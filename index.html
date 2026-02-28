@@ -4,9 +4,15 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>frontend</title>
+    <title>FinanceHub – Personal Finance</title>
   </head>
   <body>
+    <script>
+      try {
+        var t = localStorage.getItem('manajemen-keuangan-theme') || 'dark';
+        document.documentElement.classList.add(t);
+      } catch (_) { document.documentElement.classList.add('dark'); }
+    </script>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
