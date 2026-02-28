@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useQuery } from '@tanstack/react-query';
 import { reportsApi } from '@/services/api';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,6 +12,7 @@ const currentMonth = now.getMonth() + 1;
 const currentYear = now.getFullYear();
 
 export function ReportsPage() {
+  const { t } = useTranslation();
   const [month, setMonth] = useState(currentMonth);
   const [year, setYear] = useState(currentYear);
 
@@ -29,8 +31,7 @@ export function ReportsPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-2xl font-bold tracking-tight">Reports</h1>
+      <div className="flex flex-wrap items-center justify-end gap-4">
         <div className="flex gap-2">
           <select
             value={month}
@@ -58,8 +59,8 @@ export function ReportsPage() {
       <div className="grid gap-6 md:grid-cols-2">
         <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
           <CardHeader>
-            <CardTitle>Monthly summary</CardTitle>
-            <CardDescription>Income, expenses, savings for selected month</CardDescription>
+            <CardTitle>{t('reports.monthlySummary')}</CardTitle>
+            <CardDescription>{t('reports.incomeExpensesSavingsForMonth')}</CardDescription>
           </CardHeader>
           <CardContent>
             {monthlyLoading ? (
@@ -67,57 +68,57 @@ export function ReportsPage() {
             ) : summary ? (
               <div className="space-y-4">
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Total income</span>
+                  <span className="text-muted-foreground">{t('reports.totalIncome')}</span>
                   <span className="font-medium">
                     {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(summary.totalIncome)}
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Total expenses</span>
+                  <span className="text-muted-foreground">{t('reports.totalExpenses')}</span>
                   <span className="font-medium text-destructive">
                     {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(summary.totalExpenses)}
                   </span>
                 </div>
                 <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Total savings</span>
+                  <span className="text-muted-foreground">{t('reports.totalSavings')}</span>
                   <span className="font-medium text-green-600 dark:text-green-400">
                     {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(summary.totalSavings)}
                   </span>
                 </div>
                 <div className="flex justify-between text-sm border-t border-border pt-2">
-                  <span className="text-muted-foreground">Remaining</span>
+                  <span className="text-muted-foreground">{t('reports.remaining')}</span>
                   <span className="font-semibold">
                     {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(summary.remainingBalance)}
                   </span>
                 </div>
                 <div className="pt-2">
-                  <p className="text-muted-foreground mb-2 text-sm">Percentage breakdown</p>
+                  <p className="text-muted-foreground mb-2 text-sm">{t('reports.percentageBreakdown')}</p>
                   <div className="space-y-2 text-sm">
                     <div className="flex justify-between">
-                      <span>Expenses</span>
+                      <span>{t('reports.expenses')}</span>
                       <span>{summary.percentageBreakdown.expenses}%</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>Savings</span>
+                      <span>{t('reports.savings')}</span>
                       <span>{summary.percentageBreakdown.savings}%</span>
                     </div>
                     <div className="flex justify-between">
-                      <span>Remaining</span>
+                      <span>{t('reports.remaining')}</span>
                       <span>{summary.percentageBreakdown.remaining}%</span>
                     </div>
                   </div>
                 </div>
               </div>
             ) : (
-              <p className="text-muted-foreground text-sm">No data.</p>
+              <p className="text-muted-foreground text-sm">{t('reports.noData')}</p>
             )}
           </CardContent>
         </Card>
 
         <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
           <CardHeader>
-            <CardTitle>Financial health score</CardTitle>
-            <CardDescription>Score 0–100 and suggestions</CardDescription>
+            <CardTitle>{t('reports.financialHealthScore')}</CardTitle>
+            <CardDescription>{t('reports.scoreAndSuggestions')}</CardDescription>
           </CardHeader>
           <CardContent>
             {healthLoading ? (
@@ -129,28 +130,28 @@ export function ReportsPage() {
                   <span className="text-2xl font-bold">{health.score}</span>
                 </div>
                 <p className="text-muted-foreground text-sm">
-                  Status: <span className="font-medium text-foreground">{health.status}</span>
+                  {t('reports.status')}: <span className="font-medium text-foreground">{t(`reports.status${health.status as 'Critical' | 'Poor' | 'Fair' | 'Good' | 'Healthy'}`)}</span>
                 </p>
                 <div className="text-muted-foreground space-y-1 text-sm">
-                  <p>Savings rate: {health.metrics.savingsRate}%</p>
-                  <p>Expense ratio: {health.metrics.expenseRatio}%</p>
+                  <p>{t('reports.savingsRate')}: {health.metrics.savingsRate}%</p>
+                  <p>{t('reports.expenseRatio')}: {health.metrics.expenseRatio}%</p>
                 </div>
                 {health.suggestions.length > 0 && (
                   <div className="rounded-lg border border-border/50 bg-muted/30 p-3">
                     <p className="mb-2 flex items-center gap-2 text-sm font-medium">
                       <AlertCircle className="size-4" />
-                      Suggestions
+                      {t('reports.suggestions')}
                     </p>
                     <ul className="list-inside list-disc space-y-1 text-sm text-muted-foreground">
-                      {health.suggestions.map((s, i) => (
-                        <li key={i}>{s}</li>
+                      {health.suggestions.map((key, i) => (
+                        <li key={i}>{t(`reports.suggestion_${key}`)}</li>
                       ))}
                     </ul>
                   </div>
                 )}
               </div>
             ) : (
-              <p className="text-muted-foreground text-sm">No data.</p>
+              <p className="text-muted-foreground text-sm">{t('reports.noData')}</p>
             )}
           </CardContent>
         </Card>
