@@ -1,6 +1,8 @@
 import { useQuery } from '@tanstack/react-query';
+import { useTranslation } from 'react-i18next';
 import { reportsApi, transactionsApi } from '@/services/api';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import {
   PieChart,
@@ -21,9 +23,10 @@ const now = new Date();
 const month = now.getMonth() + 1;
 const year = now.getFullYear();
 
-const COLORS = ['hsl(var(--chart-1))', 'hsl(var(--chart-2))', 'hsl(var(--chart-3))', 'hsl(var(--chart-4))', 'hsl(var(--chart-5))'];
+const PIE_COLORS = ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)', 'var(--chart-4)', 'var(--chart-5)'];
 
 export function DashboardPage() {
+  const { t } = useTranslation();
   const [m, setM] = useState(month);
   const [y, setY] = useState(year);
 
@@ -69,8 +72,7 @@ export function DashboardPage() {
 
   return (
     <div className="space-y-8">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-2xl font-bold tracking-tight">Dashboard</h1>
+      <div className="flex flex-wrap items-center justify-end gap-4">
         <div className="flex gap-2">
           <select
             value={m}
@@ -98,7 +100,7 @@ export function DashboardPage() {
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-muted-foreground text-sm font-medium">Monthly Income</CardTitle>
+            <CardTitle className="text-muted-foreground text-sm font-medium">{t('dashboard.monthlyIncome')}</CardTitle>
             <Wallet className="text-muted-foreground size-4" />
           </CardHeader>
           <CardContent>
@@ -111,7 +113,7 @@ export function DashboardPage() {
         </Card>
         <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-muted-foreground text-sm font-medium">Monthly Expense</CardTitle>
+            <CardTitle className="text-muted-foreground text-sm font-medium">{t('dashboard.monthlyExpense')}</CardTitle>
             <TrendingDown className="text-muted-foreground size-4" />
           </CardHeader>
           <CardContent>
@@ -124,7 +126,7 @@ export function DashboardPage() {
         </Card>
         <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-muted-foreground text-sm font-medium">Remaining Balance</CardTitle>
+            <CardTitle className="text-muted-foreground text-sm font-medium">{t('dashboard.remainingBalance')}</CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -136,7 +138,7 @@ export function DashboardPage() {
         </Card>
         <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-muted-foreground text-sm font-medium">Savings Rate</CardTitle>
+            <CardTitle className="text-muted-foreground text-sm font-medium">{t('dashboard.savingsRate')}</CardTitle>
             <Percent className="text-muted-foreground size-4" />
           </CardHeader>
           <CardContent>
@@ -148,8 +150,8 @@ export function DashboardPage() {
       <div className="grid gap-6 lg:grid-cols-2">
         <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
           <CardHeader>
-            <CardTitle>Expense by Category</CardTitle>
-            <CardDescription>Breakdown for selected month</CardDescription>
+            <CardTitle>{t('dashboard.expenseByCategory')}</CardTitle>
+            <CardDescription>{t('dashboard.breakdownForMonth')}</CardDescription>
           </CardHeader>
           <CardContent>
             {pieData.length ? (
@@ -166,22 +168,22 @@ export function DashboardPage() {
                     label={({ name, value }) => `${name}: ${value}`}
                   >
                     {pieData.map((_, i) => (
-                      <Cell key={i} fill={COLORS[i % COLORS.length]} />
+                      <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
                     ))}
                   </Pie>
                   <Tooltip formatter={(v: number) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(v)} />
                 </PieChart>
               </ResponsiveContainer>
             ) : (
-              <p className="text-muted-foreground py-12 text-center text-sm">No expense data for this month.</p>
+              <p className="text-muted-foreground py-12 text-center text-sm">{t('dashboard.noExpenseData')}</p>
             )}
           </CardContent>
         </Card>
 
         <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
           <CardHeader>
-            <CardTitle>6-Month Trend</CardTitle>
-            <CardDescription>Income vs expenses</CardDescription>
+            <CardTitle>{t('dashboard.trend6Months')}</CardTitle>
+            <CardDescription>{t('dashboard.incomeVsExpenses')}</CardDescription>
           </CardHeader>
           <CardContent>
             {trendLoading ? (
@@ -200,9 +202,9 @@ export function DashboardPage() {
                     labelFormatter={(_: unknown, payload: Array<{ payload?: { month?: number; year?: number } }>) =>
                     payload?.[0]?.payload && `${payload[0].payload.month}/${payload[0].payload.year}`}
                   />
-                  <Line type="monotone" dataKey="income" stroke="hsl(var(--chart-1))" name="Income" strokeWidth={2} />
-                  <Line type="monotone" dataKey="expenses" stroke="hsl(var(--destructive))" name="Expenses" strokeWidth={2} />
-                  <Line type="monotone" dataKey="savings" stroke="hsl(var(--chart-2))" name="Savings" strokeWidth={2} />
+                  <Line type="monotone" dataKey="income" stroke="var(--chart-1)" name="Income" strokeWidth={2} />
+                  <Line type="monotone" dataKey="expenses" stroke="var(--destructive)" name="Expenses" strokeWidth={2} />
+                  <Line type="monotone" dataKey="savings" stroke="var(--chart-2)" name="Savings" strokeWidth={2} />
                 </LineChart>
               </ResponsiveContainer>
             ) : (
@@ -214,8 +216,8 @@ export function DashboardPage() {
 
       <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
         <CardHeader>
-          <CardTitle>Recent Transactions</CardTitle>
-          <CardDescription>Latest activity</CardDescription>
+          <CardTitle>{t('dashboard.recentTransactions')}</CardTitle>
+          <CardDescription>{t('dashboard.latestActivity')}</CardDescription>
         </CardHeader>
         <CardContent>
           <RecentTransactions month={m} year={y} />
@@ -226,6 +228,7 @@ export function DashboardPage() {
 }
 
 function RecentTransactions({ month, year }: { month: number; year: number }) {
+  const { t } = useTranslation();
   const { data: res, isLoading } = useQuery({
     queryKey: ['transactions-list', month, year],
     queryFn: () => transactionsApi.list({ month, year, limit: 10 }),
@@ -233,27 +236,29 @@ function RecentTransactions({ month, year }: { month: number; year: number }) {
   const list = (res?.data ?? []) as Array<{ id: string; amount: number; type: string; date: string; category?: { name: string } }>;
 
   if (isLoading) return <Skeleton className="h-32 w-full" />;
-  if (!list.length) return <p className="text-muted-foreground text-sm">No transactions this month.</p>;
+  if (!list.length) return <p className="text-muted-foreground text-sm">{t('dashboard.noTransactionsThisMonth')}</p>;
 
   return (
-    <div className="space-y-2">
-      {list.map((t) => (
-        <div
-          key={t.id}
-          className="flex items-center justify-between rounded-lg border border-border/50 px-4 py-2"
-        >
-          <div>
-            <span className="font-medium">{t.category?.name ?? '—'}</span>
-            <span className="text-muted-foreground ml-2 text-sm">
-              {new Date(t.date).toLocaleDateString()}
+    <ScrollArea className="h-[280px] w-full pr-3">
+      <div className="space-y-2">
+        {list.map((item) => (
+          <div
+            key={item.id}
+            className="flex items-center justify-between rounded-lg border border-border/50 px-4 py-2"
+          >
+            <div>
+              <span className="font-medium">{item.category?.name ?? '—'}</span>
+              <span className="text-muted-foreground ml-2 text-sm">
+                {new Date(item.date).toLocaleDateString()}
+              </span>
+            </div>
+            <span className={item.type === 'expense' ? 'text-destructive' : 'text-green-600 dark:text-green-400'}>
+              {item.type === 'expense' ? '-' : '+'}
+              {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(item.amount)}
             </span>
           </div>
-          <span className={t.type === 'expense' ? 'text-destructive' : 'text-green-600 dark:text-green-400'}>
-            {t.type === 'expense' ? '-' : '+'}
-            {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(t.amount)}
-          </span>
-        </div>
-      ))}
-    </div>
+        ))}
+      </div>
+    </ScrollArea>
   );
 }
