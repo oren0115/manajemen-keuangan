@@ -7,8 +7,14 @@ export interface ApiError {
   details?: unknown;
 }
 
+let tokenGetter: () => Promise<string | null> = async () => null;
+
+export function setAuthTokenGetter(getToken: () => Promise<string | null>) {
+  tokenGetter = getToken;
+}
+
 async function getStoredToken(): Promise<string | null> {
-  return localStorage.getItem('accessToken');
+  return tokenGetter();
 }
 
 export async function request<T>(
@@ -55,22 +61,13 @@ export const api = {
     request<T>(path, { ...init, method: 'DELETE' }),
 };
 
-// Auth
-export interface AuthResult {
-  user: { id: string; name: string; email: string; role: string };
-  tokens: { accessToken: string; refreshToken: string; expiresIn: number };
-}
+// Auth (Firebase: login/register on client; backend only me + updateProfile)
+export type AuthUser = { id: string; name: string; email: string; role: string };
+
 export const authApi = {
-  register: (body: { name: string; email: string; password: string }) =>
-    api.post<{ success: true; data: AuthResult }>('/auth/register', body, { skipAuth: true }),
-  login: (body: { email: string; password: string }) =>
-    api.post<{ success: true; data: AuthResult }>('/auth/login', body, { skipAuth: true }),
-  refresh: (refreshToken: string) =>
-    api.post<{ success: true; data: { accessToken: string; refreshToken: string; expiresIn: number } }>(
-      '/auth/refresh',
-      { refreshToken },
-      { skipAuth: true }
-    ),
+  me: () => api.get<{ success: true; data: AuthUser }>('/auth/me'),
+  updateProfile: (body: { name: string }) =>
+    api.put<{ success: true; data: AuthUser }>('/auth/profile', body),
 };
 
 // Incomes
@@ -106,6 +103,8 @@ export const categoriesApi = {
     api.get<{ success: true; data: Array<{ id: string; name: string; type: string }> }>(
       type ? `/categories?type=${type}` : '/categories'
     ),
+  create: (body: { name: string; type: 'fixed' | 'variable' | 'saving' }) =>
+    api.post<{ success: true; data: { id: string; name: string; type: string } }>('/categories', body),
 };
 
 // Budgets
