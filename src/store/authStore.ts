@@ -64,7 +64,7 @@ export const useAuthStore = create<AuthState>()(
         const token = await credential.user.getIdToken();
         if (token) {
           const res = await authApi.me();
-          set({ user: res.data });
+          set({ user: { ...res.data, email: credential.user.email ?? '' } });
         }
       },
 
@@ -76,7 +76,7 @@ export const useAuthStore = create<AuthState>()(
         const token = await result.user.getIdToken();
         if (token) {
           const res = await authApi.me();
-          set({ user: res.data });
+          set({ user: { ...res.data, email: result.user.email ?? '' } });
         }
       },
 
@@ -88,7 +88,7 @@ export const useAuthStore = create<AuthState>()(
         const token = await credential.user.getIdToken(true);
         if (token) {
           const res = await authApi.me();
-          set({ user: res.data });
+          set({ user: { ...res.data, email: credential.user.email ?? '' } });
         }
       },
 
@@ -142,7 +142,7 @@ export const useAuthStore = create<AuthState>()(
             const token = await firebaseUser.getIdToken();
             if (token) {
               const res = await authApi.me();
-              set({ user: res.data });
+              set({ user: { ...res.data, email: firebaseUser.email ?? '' } });
             } else {
               set({ user: null });
             }
