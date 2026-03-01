@@ -33,7 +33,7 @@ export function ProfilePage() {
     },
   });
 
-  const user = data ?? storeUser;
+  const user = data ? { ...data, email: storeUser?.email ?? '' } : storeUser;
 
   useEffect(() => {
     if (user?.name) setName(user.name);
@@ -42,7 +42,7 @@ export function ProfilePage() {
   const mutation = useMutation({
     mutationFn: (body: { name: string }) => authApi.updateProfile(body),
     onSuccess: (res) => {
-      const updated = res.data;
+      const updated = { ...res.data, email: storeUser?.email ?? '' };
       setUser(updated);
       queryClient.setQueryData(['profile', 'me'], updated);
     },
@@ -104,7 +104,7 @@ export function ProfilePage() {
   }
 
   return (
-    <div className="space-y-8 max-w-xl">
+    <div className="space-y-8 w-full">
       <Card className="border-border/50 bg-card/80 shadow-sm backdrop-blur-sm">
         <CardHeader className="pb-4">
           <div className="flex items-center gap-2">
@@ -119,14 +119,14 @@ export function ProfilePage() {
         </CardHeader>
         <CardContent className="space-y-6">
           <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
+            <div className="space-y-3">
               <label className="text-sm font-medium text-muted-foreground">{t('auth.email')}</label>
               <p className="text-sm font-medium">{user?.email}</p>
             </div>
-            <div className="space-y-2">
+            {/* <div className="space-y-2">
               <label className="text-sm font-medium text-muted-foreground">{t('profile.role')}</label>
               <p className="text-sm font-medium capitalize">{user?.role}</p>
-            </div>
+            </div> */}
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -140,7 +140,7 @@ export function ProfilePage() {
                 {error}
               </div>
             )}
-            <div className="space-y-2">
+            <div className="space-y-3">
               <label htmlFor="profile-name" className="text-sm font-medium leading-none">
                 {t('auth.name')}
               </label>
@@ -187,7 +187,7 @@ export function ProfilePage() {
                       {passwordSuccess}
                     </div>
                   )}
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     <label htmlFor="current-password" className="text-sm font-medium leading-none">
                       {t('profile.currentPassword')}
                     </label>
@@ -200,7 +200,7 @@ export function ProfilePage() {
                       required
                     />
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     <label htmlFor="new-password" className="text-sm font-medium leading-none">
                       {t('profile.newPassword')}
                     </label>
@@ -213,7 +213,7 @@ export function ProfilePage() {
                       minLength={8}
                     />
                   </div>
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     <label htmlFor="confirm-new-password" className="text-sm font-medium leading-none">
                       {t('profile.confirmNewPassword')}
                     </label>
