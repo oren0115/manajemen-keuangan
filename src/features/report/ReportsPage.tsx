@@ -5,6 +5,13 @@ import { reportsApi } from '@/services/api';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Progress } from '@/components/ui/progress';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { AlertCircle } from 'lucide-react';
 
 const now = new Date();
@@ -33,26 +40,28 @@ export function ReportsPage() {
     <div className="space-y-8">
       <div className="flex flex-wrap items-center justify-end gap-4">
         <div className="flex gap-2">
-          <select
-            value={month}
-            onChange={(e) => setMonth(Number(e.target.value))}
-            className="rounded-md border border-input bg-background px-3 py-2 text-sm"
-          >
-            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((m) => (
-              <option key={m} value={m}>
-                {new Date(2000, m - 1).toLocaleString('default', { month: 'long' })}
-              </option>
-            ))}
-          </select>
-          <select
-            value={year}
-            onChange={(e) => setYear(Number(e.target.value))}
-            className="rounded-md border border-input bg-background px-3 py-2 text-sm"
-          >
-            {[currentYear, currentYear - 1, currentYear - 2].map((y) => (
-              <option key={y} value={y}>{y}</option>
-            ))}
-          </select>
+          <Select value={String(month)} onValueChange={(v) => setMonth(Number(v))}>
+            <SelectTrigger className="w-auto cursor-pointer min-w-[120px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((m) => (
+                <SelectItem className='cursor-pointer' key={m} value={String(m)}>
+                  {new Date(2000, m - 1).toLocaleString('default', { month: 'long' })}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={String(year)} onValueChange={(v) => setYear(Number(v))}>
+            <SelectTrigger className="w-auto cursor-pointer min-w-[80px]">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {[currentYear, currentYear - 1, currentYear - 2].map((y) => (
+                <SelectItem className='cursor-pointer' key={y} value={String(y)}>{y}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
@@ -93,7 +102,7 @@ export function ReportsPage() {
                 </div>
                 <div className="pt-2">
                   <p className="text-muted-foreground mb-2 text-sm">{t('reports.percentageBreakdown')}</p>
-                  <div className="space-y-2 text-sm">
+                  <div className="space-y-3 text-sm">
                     <div className="flex justify-between">
                       <span>{t('reports.expenses')}</span>
                       <span>{summary.percentageBreakdown.expenses}%</span>
