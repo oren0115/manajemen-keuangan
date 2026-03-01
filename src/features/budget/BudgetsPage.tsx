@@ -8,13 +8,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import { InputGroup, InputGroupAddon, InputGroupInput, InputGroupText } from '@/components/ui/input-group';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 const now = new Date();
 const currentMonth = now.getMonth() + 1;
 const currentYear = now.getFullYear();
-
-const selectInputClass =
-  'h-9 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-xs outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] text-foreground';
 
 export function BudgetsPage() {
   const { t } = useTranslation();
@@ -45,26 +49,28 @@ export function BudgetsPage() {
             <CardDescription>{t('budgets.categoryLimitsForMonth')}</CardDescription>
           </div>
           <div className="flex flex-wrap gap-2">
-            <select
-              value={month}
-              onChange={(e) => setMonth(Number(e.target.value))}
-              className={`${selectInputClass} w-auto min-w-[120px]`}
-            >
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((m) => (
-                <option key={m} value={m}>
-                  {new Date(2000, m - 1).toLocaleString('default', { month: 'long' })}
-                </option>
-              ))}
-            </select>
-            <select
-              value={year}
-              onChange={(e) => setYear(Number(e.target.value))}
-              className={`${selectInputClass} w-auto min-w-[80px]`}
-            >
-              {[currentYear, currentYear - 1].map((y) => (
-                <option key={y} value={y}>{y}</option>
-              ))}
-            </select>
+            <Select value={String(month)} onValueChange={(v) => setMonth(Number(v))}>
+              <SelectTrigger className="w-auto min-w-[120px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((m) => (
+                  <SelectItem key={m} value={String(m)}>
+                    {new Date(2000, m - 1).toLocaleString('default', { month: 'long' })}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={String(year)} onValueChange={(v) => setYear(Number(v))}>
+              <SelectTrigger className="w-auto min-w-[80px]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {[currentYear, currentYear - 1].map((y) => (
+                  <SelectItem key={y} value={String(y)}>{y}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         </CardHeader>
         <CardContent>
@@ -176,19 +182,18 @@ function AddBudgetForm({ onSuccess }: { onSuccess: () => void }) {
             </div>
           )}
           <div className="grid gap-6 sm:grid-cols-2">
-            <div className="space-y-2">
+            <div className="space-y-3">
               <label className="text-sm font-medium leading-none">{t('transactions.category')}</label>
-              <select
-                value={categoryId}
-                onChange={(e) => setCategoryId(e.target.value)}
-                className={selectInputClass}
-                required
-              >
-                <option value="">{t('transactions.selectCategory')}</option>
-                {categories.map((c: { id: string; name: string }) => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
-                ))}
-              </select>
+              <Select value={categoryId || undefined} onValueChange={setCategoryId}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder={t('transactions.selectCategory')} />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories.map((c: { id: string; name: string }) => (
+                    <SelectItem key={c.id} value={c.id}>{c.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <button
                 type="button"
                 onClick={() => setShowAddCategory((v) => !v)}
@@ -209,14 +214,15 @@ function AddBudgetForm({ onSuccess }: { onSuccess: () => void }) {
                   </div>
                   <div className="w-full min-w-[100px] sm:w-auto space-y-1.5">
                     <label className="text-xs font-medium text-muted-foreground">{t('budgets.fixed')} / {t('budgets.variable')}</label>
-                    <select
-                      value={newCategoryType}
-                      onChange={(e) => setNewCategoryType(e.target.value as 'fixed' | 'variable')}
-                      className={selectInputClass}
-                    >
-                      <option value="fixed">{t('budgets.fixed')}</option>
-                      <option value="variable">{t('budgets.variable')}</option>
-                    </select>
+                    <Select value={newCategoryType} onValueChange={(v) => setNewCategoryType(v as 'fixed' | 'variable')}>
+                      <SelectTrigger className="w-full">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="fixed">{t('budgets.fixed')}</SelectItem>
+                        <SelectItem value="variable">{t('budgets.variable')}</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                   <Button
                     type="button"
@@ -230,7 +236,7 @@ function AddBudgetForm({ onSuccess }: { onSuccess: () => void }) {
                 </div>
               )}
             </div>
-            <div className="space-y-2">
+            <div className="space-y-3">
               <label className="text-sm font-medium leading-none">{t('budgets.limitAmount')}</label>
               <InputGroup>
                 <InputGroupAddon align="inline-start">
@@ -250,31 +256,33 @@ function AddBudgetForm({ onSuccess }: { onSuccess: () => void }) {
             </div>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
+            <div className="space-y-3">
               <label className="text-sm font-medium leading-none">{t('budgets.month')}</label>
-              <select
-                value={month}
-                onChange={(e) => setMonth(Number(e.target.value))}
-                className={selectInputClass}
-              >
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((m) => (
-                  <option key={m} value={m}>
-                    {new Date(2000, m - 1).toLocaleString('default', { month: 'long' })}
-                  </option>
-                ))}
-              </select>
+              <Select value={String(month)} onValueChange={(v) => setMonth(Number(v))}>
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((m) => (
+                    <SelectItem key={m} value={String(m)}>
+                      {new Date(2000, m - 1).toLocaleString('default', { month: 'long' })}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-3">
               <label className="text-sm font-medium leading-none">{t('budgets.year')}</label>
-              <select
-                value={year}
-                onChange={(e) => setYear(Number(e.target.value))}
-                className={selectInputClass}
-              >
-                {[currentYear, currentYear - 1].map((y) => (
-                  <option key={y} value={y}>{y}</option>
-                ))}
-              </select>
+              <Select value={String(year)} onValueChange={(v) => setYear(Number(v))}>
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {[currentYear, currentYear - 1].map((y) => (
+                    <SelectItem key={y} value={String(y)}>{y}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
           <div className="pt-1">
