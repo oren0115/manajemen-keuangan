@@ -67,7 +67,7 @@ export function ForgotPasswordPage() {
                 {error}
               </div>
             )}
-            <div className="space-y-2">
+            <div className="space-y-3">
               <label className="text-sm font-medium" htmlFor="forgot-email">
                 {t('auth.email')}
               </label>
