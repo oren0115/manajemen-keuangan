@@ -62,12 +62,14 @@ export const api = {
 };
 
 // Auth (Firebase: login/register on client; backend only me + updateProfile)
+// Response API sengaja tidak menyertakan email (keamanan); email diisi dari Firebase di client
 export type AuthUser = { id: string; name: string; email: string; role: string };
+export type AuthMeResponse = { id: string; name: string; role: string };
 
 export const authApi = {
-  me: () => api.get<{ success: true; data: AuthUser }>('/auth/me'),
+  me: () => api.get<{ success: true; data: AuthMeResponse }>('/auth/me'),
   updateProfile: (body: { name: string }) =>
-    api.put<{ success: true; data: AuthUser }>('/auth/profile', body),
+    api.put<{ success: true; data: AuthMeResponse }>('/auth/profile', body),
 };
 
 // Incomes
