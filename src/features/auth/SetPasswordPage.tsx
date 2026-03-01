@@ -89,7 +89,7 @@ export function SetPasswordPage() {
                 {error}
               </div>
             )}
-            <div className="space-y-2">
+            <div className="space-y-3">
               <label htmlFor="set-password" className="text-sm font-medium leading-none">
                 {t('auth.password')}
               </label>
@@ -104,7 +104,7 @@ export function SetPasswordPage() {
                 autoComplete="new-password"
               />
             </div>
-            <div className="space-y-2">
+            <div className="space-y-3">
               <label htmlFor="set-password-confirm" className="text-sm font-medium leading-none">
                 {t('auth.confirmPassword')}
               </label>
