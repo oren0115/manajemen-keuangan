@@ -101,7 +101,7 @@ export function RegisterPage() {
         </div>
 
         <form onSubmit={handleEmailSubmit} className="space-y-4">
-          <div className="space-y-2">
+          <div className="space-y-3">
             <label className="text-sm font-medium" htmlFor="name">
               {t('auth.name')}
             </label>
@@ -116,7 +116,7 @@ export function RegisterPage() {
               className="bg-background"
             />
           </div>
-          <div className="space-y-2">
+          <div className="space-y-3">
             <label className="text-sm font-medium" htmlFor="email">
               {t('auth.email')}
             </label>
@@ -131,7 +131,7 @@ export function RegisterPage() {
               className="bg-background"
             />
           </div>
-          <div className="space-y-2">
+          <div className="space-y-3">
             <label className="text-sm font-medium" htmlFor="password">
               {t('auth.password')}
             </label>
