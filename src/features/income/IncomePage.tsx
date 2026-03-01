@@ -34,30 +34,43 @@ export function IncomePage() {
 
   const list = (data?.data ?? []) as Array<{ id: string; amount: number; month: number; year: number; note?: string }>;
 
+  const filterMonths = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((m) => ({
+    value: String(m),
+    label: new Date(2000, m - 1).toLocaleString('default', { month: 'long' }),
+  }));
+  const filterYears = [currentYear, currentYear - 1, currentYear - 2].map((y) => ({
+    value: String(y),
+    label: String(y),
+  }));
+
   return (
     <div className="space-y-8">
       <div className="flex flex-wrap items-center justify-end gap-4">
         <div className="flex gap-2">
-          <select
-            value={month}
-            onChange={(e) => setMonth(Number(e.target.value))}
-            className="rounded-md border border-input bg-background px-3 py-2 text-sm"
-          >
-            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((m) => (
-              <option key={m} value={m}>
-                {new Date(2000, m - 1).toLocaleString('default', { month: 'long' })}
-              </option>
-            ))}
-          </select>
-          <select
-            value={year}
-            onChange={(e) => setYear(Number(e.target.value))}
-            className="rounded-md border border-input bg-background px-3 py-2 text-sm"
-          >
-            {[currentYear, currentYear - 1, currentYear - 2].map((y) => (
-              <option key={y} value={y}>{y}</option>
-            ))}
-          </select>
+          <Select value={String(month)} onValueChange={(v) => setMonth(Number(v))}>
+            <SelectTrigger className="w-[180px] cursor-pointer">
+              <SelectValue placeholder={t('budgets.month')} />
+            </SelectTrigger>
+            <SelectContent>
+              {filterMonths.map(({ value, label }) => (
+                <SelectItem key={value} value={value} className="cursor-pointer">
+                  {label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select value={String(year)} onValueChange={(v) => setYear(Number(v))}>
+            <SelectTrigger className="w-[100px] cursor-pointer">
+              <SelectValue placeholder={t('budgets.year')} />
+            </SelectTrigger>
+            <SelectContent>
+              {filterYears.map(({ value, label }) => (
+                <SelectItem key={value} value={value} className="cursor-pointer">
+                  {label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
@@ -173,7 +186,7 @@ function AddIncomeForm({ onSuccess }: { onSuccess: () => void }) {
             </div>
           )}
           <div className="grid gap-5 sm:grid-cols-2">
-            <div className="space-y-2">
+            <div className="space-y-3">
               <label htmlFor="income-amount" className="text-sm font-medium leading-none">
                 {t('income.amount')}
               </label>
@@ -195,7 +208,7 @@ function AddIncomeForm({ onSuccess }: { onSuccess: () => void }) {
                 />
               </div>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-3">
               <label htmlFor="income-note" className="text-sm font-medium leading-none">
                 {t('income.note')}
               </label>
@@ -208,36 +221,36 @@ function AddIncomeForm({ onSuccess }: { onSuccess: () => void }) {
             </div>
           </div>
           <div className="grid gap-5 sm:grid-cols-2">
-            <div className="space-y-2">
+            <div className="space-y-3">
               <label className="text-sm font-medium leading-none">{t('budgets.month')}</label>
               <Select
                 value={String(month)}
                 onValueChange={(v) => setMonth(Number(v))}
               >
-                <SelectTrigger id="income-month" className="w-full">
+                <SelectTrigger id="income-month" className="w-full cursor-pointer">
                   <SelectValue placeholder="Select month" />
                 </SelectTrigger>
                 <SelectContent>
                   {months.map(({ value, label }) => (
-                    <SelectItem key={value} value={value}>
+                    <SelectItem key={value} value={value} className='cursor-pointer'>
                       {label}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-3">
               <label className="text-sm font-medium leading-none">{t('budgets.year')}</label>
               <Select
                 value={String(year)}
                 onValueChange={(v) => setYear(Number(v))}
               >
-                <SelectTrigger id="income-year" className="w-full">
+                <SelectTrigger id="income-year" className="w-full cursor-pointer">
                   <SelectValue placeholder="Select year" />
                 </SelectTrigger>
                 <SelectContent>
                   {years.map(({ value, label }) => (
-                    <SelectItem key={value} value={value}>
+                    <SelectItem key={value} value={value} className='cursor-pointer'>
                       {label}
                     </SelectItem>
                   ))}
@@ -247,7 +260,7 @@ function AddIncomeForm({ onSuccess }: { onSuccess: () => void }) {
           </div>
           <Button
             type="submit"
-            className="w-full sm:w-auto"
+            className="w-full sm:w-auto cursor-pointer"
             disabled={mutation.isPending}
           >
             {mutation.isPending ? t('profile.saving') : t('income.addIncome')}
