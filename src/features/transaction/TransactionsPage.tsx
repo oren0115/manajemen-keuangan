@@ -6,6 +6,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const now = new Date();
@@ -26,41 +33,75 @@ export function TransactionsPage() {
 
   const list = (data?.data ?? []) as Array<{ id: string; amount: number; type: string; date: string; note?: string; category?: { name: string } }>;
 
+  const filterMonths = [
+    { value: 'all', label: t('transactions.allMonths') },
+    ...[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((m) => ({
+      value: String(m),
+      label: new Date(2000, m - 1).toLocaleString('default', { month: 'long' }),
+    })),
+  ];
+  const filterYears = [
+    { value: 'all', label: t('transactions.allYears') },
+    ...[currentYear, currentYear - 1, currentYear - 2].map((y) => ({
+      value: String(y),
+      label: String(y),
+    })),
+  ];
+  const filterTypes = [
+    { value: 'all', label: t('transactions.allTypes') },
+    { value: 'expense', label: t('transactions.expense') },
+    { value: 'saving', label: t('transactions.saving') },
+  ];
+
   return (
     <div className="space-y-8">
       <div className="flex flex-wrap items-center justify-end gap-4">
         <div className="flex flex-wrap gap-2">
-          <select
-            value={month ?? ''}
-            onChange={(e) => setMonth(e.target.value ? Number(e.target.value) : undefined)}
-            className="rounded-md border border-input bg-background px-3 py-2 text-sm"
+          <Select
+            value={month !== undefined ? String(month) : 'all'}
+            onValueChange={(v) => setMonth(v === 'all' ? undefined : Number(v))}
           >
-            <option value="">{t('transactions.allMonths')}</option>
-            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((m) => (
-              <option key={m} value={m}>
-                {new Date(2000, m - 1).toLocaleString('default', { month: 'long' })}
-              </option>
-            ))}
-          </select>
-          <select
-            value={year ?? ''}
-            onChange={(e) => setYear(e.target.value ? Number(e.target.value) : undefined)}
-            className="rounded-md border border-input bg-background px-3 py-2 text-sm"
+            <SelectTrigger className="w-[180px] cursor-pointer">
+              <SelectValue placeholder={t('budgets.month')} />
+            </SelectTrigger>
+            <SelectContent>
+              {filterMonths.map(({ value, label }) => (
+                <SelectItem key={value} value={value} className="cursor-pointer">
+                  {label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select
+            value={year !== undefined ? String(year) : 'all'}
+            onValueChange={(v) => setYear(v === 'all' ? undefined : Number(v))}
           >
-            <option value="">{t('transactions.allYears')}</option>
-            {[currentYear, currentYear - 1, currentYear - 2].map((y) => (
-              <option key={y} value={y}>{y}</option>
-            ))}
-          </select>
-          <select
-            value={typeFilter ?? ''}
-            onChange={(e) => setTypeFilter((e.target.value as 'expense' | 'saving') || undefined)}
-            className="rounded-md border border-input bg-background px-3 py-2 text-sm"
+            <SelectTrigger className="w-[100px] cursor-pointer">
+              <SelectValue placeholder={t('budgets.year')} />
+            </SelectTrigger>
+            <SelectContent>
+              {filterYears.map(({ value, label }) => (
+                <SelectItem key={value} value={value} className="cursor-pointer">
+                  {label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <Select
+            value={typeFilter ?? 'all'}
+            onValueChange={(v) => setTypeFilter(v === 'all' ? undefined : (v as 'expense' | 'saving'))}
           >
-            <option value="">{t('transactions.allTypes')}</option>
-            <option value="expense">{t('transactions.expense')}</option>
-            <option value="saving">{t('transactions.saving')}</option>
-          </select>
+            <SelectTrigger className="w-[140px] cursor-pointer">
+              <SelectValue placeholder={t('transactions.allTypes')} />
+            </SelectTrigger>
+            <SelectContent>
+              {filterTypes.map(({ value, label }) => (
+                <SelectItem key={value} value={value} className="cursor-pointer">
+                  {label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
@@ -74,7 +115,7 @@ export function TransactionsPage() {
 
       <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
         <CardHeader>
-<CardTitle>{t('transactions.transactionList')}</CardTitle>
+        <CardTitle>{t('transactions.transactionList')}</CardTitle>
         <CardDescription>{data?.total ?? 0} {t('dashboard.transactions')}</CardDescription>
         </CardHeader>
         <CardContent>
@@ -200,34 +241,46 @@ function AddTransactionForm({ onSuccess }: { onSuccess: () => void }) {
             <div className="rounded-md bg-destructive/10 px-3 py-2 text-sm text-destructive">{error}</div>
           )}
           <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
+            <div className="space-y-3">
               <label className="text-sm font-medium">{t('transactions.type')}</label>
-              <select
-                value={type}
-                onChange={(e) => setType(e.target.value as 'expense' | 'saving')}
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-              >
-                <option value="expense">{t('transactions.expense')}</option>
-                <option value="saving">{t('transactions.saving')}</option>
-              </select>
+              <Select value={type} onValueChange={(v) => setType(v as 'expense' | 'saving')}>
+                <SelectTrigger className="w-full cursor-pointer">
+                  <SelectValue placeholder={t('transactions.type')} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="expense" className="cursor-pointer">
+                    {t('transactions.expense')}
+                  </SelectItem>
+                  <SelectItem value="saving" className="cursor-pointer">
+                    {t('transactions.saving')}
+                  </SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-            <div className="space-y-2">
+            <div className="space-y-3">
               <label className="text-sm font-medium">{t('transactions.category')}</label>
-              <select
-                value={categoryId}
-                onChange={(e) => setCategoryId(e.target.value)}
-                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
-                required
+              <Select
+                value={categoryId || '__none__'}
+                onValueChange={(v) => setCategoryId(v === '__none__' ? '' : v)}
               >
-                <option value="">{t('transactions.selectCategory')}</option>
-                {filteredCategories.map((c: { id: string; name: string }) => (
-                  <option key={c.id} value={c.id}>{c.name}</option>
-                ))}
-              </select>
+                <SelectTrigger className="w-full cursor-pointer">
+                  <SelectValue placeholder={t('transactions.selectCategory')} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__" className="cursor-pointer">
+                    {t('transactions.selectCategory')}
+                  </SelectItem>
+                  {filteredCategories.map((c: { id: string; name: string }) => (
+                    <SelectItem key={c.id} value={c.id} className="cursor-pointer">
+                      {c.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <button
                 type="button"
                 onClick={() => setShowAddCategory((v) => !v)}
-                className="text-muted-foreground text-xs underline-offset-4 hover:underline"
+                className="text-muted-foreground text-xs cursor-pointer underline-offset-4 hover:underline"
               >
                 {showAddCategory ? t('transactions.cancel') : t('transactions.categoryNotFoundAdd')}
               </button>
@@ -240,14 +293,22 @@ function AddTransactionForm({ onSuccess }: { onSuccess: () => void }) {
                     className="max-w-[180px]"
                   />
                   {type === 'expense' && (
-                    <select
+                    <Select
                       value={newCategoryType}
-                      onChange={(e) => setNewCategoryType(e.target.value as 'fixed' | 'variable')}
-                      className="rounded-md border border-input bg-background px-3 py-2 text-sm"
+                      onValueChange={(v) => setNewCategoryType(v as 'fixed' | 'variable')}
                     >
-                      <option value="fixed">{t('budgets.fixed')}</option>
-                      <option value="variable">{t('budgets.variable')}</option>
-                    </select>
+                      <SelectTrigger className="w-[130px] cursor-pointer">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="fixed" className="cursor-pointer">
+                          {t('budgets.fixed')}
+                        </SelectItem>
+                        <SelectItem value="variable" className="cursor-pointer">
+                          {t('budgets.variable')}
+                        </SelectItem>
+                      </SelectContent>
+                    </Select>
                   )}
                   <Button
                     type="button"
@@ -263,7 +324,7 @@ function AddTransactionForm({ onSuccess }: { onSuccess: () => void }) {
             </div>
           </div>
           <div className="grid gap-4 sm:grid-cols-2">
-            <div className="space-y-2">
+            <div className="space-y-3">
               <label className="text-sm font-medium">{t('transactions.amount')}</label>
               <Input
                 type="number"
@@ -275,16 +336,16 @@ function AddTransactionForm({ onSuccess }: { onSuccess: () => void }) {
                 required
               />
             </div>
-            <div className="space-y-2">
+            <div className="space-y-3">
               <label className="text-sm font-medium">{t('transactions.date')}</label>
               <Input type="date" value={date} onChange={(e) => setDate(e.target.value)} required />
             </div>
           </div>
-          <div className="space-y-2">
+          <div className="space-y-3">
             <label className="text-sm font-medium">{t('transactions.note')}</label>
             <Input placeholder={t('common.optional')} value={note} onChange={(e) => setNote(e.target.value)} />
           </div>
-          <Button type="submit" disabled={mutation.isPending}>
+          <Button type="submit" className='cursor-pointer' disabled={mutation.isPending}>
             {mutation.isPending ? t('transactions.savingButton') : t('transactions.addTransactionButton')}
           </Button>
         </form>
