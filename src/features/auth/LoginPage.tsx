@@ -104,11 +104,11 @@ export function LoginPage() {
         </div>
 
         <form onSubmit={handleEmailSubmit} className="space-y-4">
-          <div className="space-y-2">
+          <div className="space-y-3">
             <label className="text-sm font-medium" htmlFor="email">{t('auth.email')}</label>
             <Input id="email" type="email" placeholder="you@example.com" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" className="bg-background" />
           </div>
-          <div className="space-y-2">
+          <div className="space-y-3">
             <div className="flex items-center justify-between">
               <label className="text-sm font-medium" htmlFor="password">{t('auth.password')}</label>
               <Link to="/forgot-password" className="text-xs text-primary underline-offset-4 hover:underline">
