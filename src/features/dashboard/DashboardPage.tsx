@@ -23,7 +23,16 @@ const now = new Date();
 const month = now.getMonth() + 1;
 const year = now.getFullYear();
 
-const PIE_COLORS = ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)', 'var(--chart-4)', 'var(--chart-5)'];
+/** Generate N visually distinct colors for pie chart (no duplicates, works for any number of categories). */
+function getDistinctColors(count: number): string[] {
+  if (count <= 0) return [];
+  const saturation = 72;
+  const lightness = 58;
+  return Array.from({ length: count }, (_, i) => {
+    const hue = (i * 360) / count % 360;
+    return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+  });
+}
 
 export function DashboardPage() {
   const { t } = useTranslation();
@@ -50,6 +59,8 @@ export function DashboardPage() {
       value: c.total,
     }));
   }, [summary]);
+
+  const pieColors = useMemo(() => getDistinctColors(pieData.length), [pieData.length]);
 
   const savingsRate = summary?.totalIncome
     ? Math.round((summary.totalSavings / summary.totalIncome) * 10000) / 100
@@ -97,52 +108,52 @@ export function DashboardPage() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
-        <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-muted-foreground text-sm font-medium">{t('dashboard.monthlyIncome')}</CardTitle>
-            <Wallet className="text-muted-foreground size-4" />
+      <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+        <Card className="min-w-0 border-border/50 bg-card/80 backdrop-blur-sm">
+          <CardHeader className="flex flex-row items-center justify-between gap-1 pb-2">
+            <CardTitle className="text-muted-foreground shrink-0 text-xs font-medium sm:text-sm">{t('dashboard.monthlyIncome')}</CardTitle>
+            <Wallet className="text-muted-foreground size-3.5 shrink-0 sm:size-4" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
+          <CardContent className="min-w-0">
+            <div className="truncate text-base font-bold sm:text-xl lg:text-2xl">
               {summary?.totalIncome != null
                 ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(summary.totalIncome)
                 : '—'}
             </div>
           </CardContent>
         </Card>
-        <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-muted-foreground text-sm font-medium">{t('dashboard.monthlyExpense')}</CardTitle>
-            <TrendingDown className="text-muted-foreground size-4" />
+        <Card className="min-w-0 border-border/50 bg-card/80 backdrop-blur-sm">
+          <CardHeader className="flex flex-row items-center justify-between gap-1 pb-2">
+            <CardTitle className="text-muted-foreground shrink-0 text-xs font-medium sm:text-sm">{t('dashboard.monthlyExpense')}</CardTitle>
+            <TrendingDown className="text-muted-foreground size-3.5 shrink-0 sm:size-4" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-destructive">
+          <CardContent className="min-w-0">
+            <div className="truncate text-base font-bold text-destructive sm:text-xl lg:text-2xl">
               {summary?.totalExpenses != null
                 ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(summary.totalExpenses)
                 : '—'}
             </div>
           </CardContent>
         </Card>
-        <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-muted-foreground text-sm font-medium">{t('dashboard.remainingBalance')}</CardTitle>
+        <Card className="min-w-0 border-border/50 bg-card/80 backdrop-blur-sm">
+          <CardHeader className="flex flex-row items-center justify-between gap-1 pb-2">
+            <CardTitle className="text-muted-foreground shrink-0 text-xs font-medium sm:text-sm">{t('dashboard.remainingBalance')}</CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">
+          <CardContent className="min-w-0">
+            <div className="truncate text-base font-bold sm:text-xl lg:text-2xl">
               {summary?.remainingBalance != null
                 ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(summary.remainingBalance)
                 : '—'}
             </div>
           </CardContent>
         </Card>
-        <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-muted-foreground text-sm font-medium">{t('dashboard.savingsRate')}</CardTitle>
-            <Percent className="text-muted-foreground size-4" />
+        <Card className="min-w-0 border-border/50 bg-card/80 backdrop-blur-sm">
+          <CardHeader className="flex flex-row items-center justify-between gap-1 pb-2">
+            <CardTitle className="text-muted-foreground shrink-0 text-xs font-medium sm:text-sm">{t('dashboard.savingsRate')}</CardTitle>
+            <Percent className="text-muted-foreground size-3.5 shrink-0 sm:size-4" />
           </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold">{savingsRate}%</div>
+          <CardContent className="min-w-0">
+            <div className="truncate text-base font-bold sm:text-xl lg:text-2xl">{savingsRate}%</div>
           </CardContent>
         </Card>
       </div>
@@ -168,7 +179,7 @@ export function DashboardPage() {
                     label={({ name, value }) => `${name}: ${value}`}
                   >
                     {pieData.map((_, i) => (
-                      <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
+                      <Cell key={i} fill={pieColors[i]} />
                     ))}
                   </Pie>
                   <Tooltip formatter={(v: number) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(v)} />
