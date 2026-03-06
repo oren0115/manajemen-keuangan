@@ -4,6 +4,7 @@ import { reportsApi, transactionsApi } from '@/services/api';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useTheme } from '@/components/theme-provider';
 import {
   PieChart,
   Pie,
@@ -11,10 +12,13 @@ import {
   ResponsiveContainer,
   LineChart,
   Line,
+  BarChart,
+  Bar,
   XAxis,
   YAxis,
   Tooltip,
   CartesianGrid,
+  Legend,
 } from 'recharts';
 import { Wallet, TrendingDown, Percent } from 'lucide-react';
 import { useMemo, useState } from 'react';
@@ -23,21 +27,29 @@ const now = new Date();
 const month = now.getMonth() + 1;
 const year = now.getFullYear();
 
-/** Generate N visually distinct colors for pie chart (no duplicates, works for any number of categories). */
-function getDistinctColors(count: number): string[] {
-  if (count <= 0) return [];
-  const saturation = 72;
-  const lightness = 58;
-  return Array.from({ length: count }, (_, i) => {
-    const hue = (i * 360) / count % 360;
-    return `hsl(${hue}, ${saturation}%, ${lightness}%)`;
-  });
+const CHART_COLORS = ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)', 'var(--chart-4)', 'var(--chart-5)'];
+
+/** Theme-aware colors for pie (cycles chart-1..5). */
+function getChartColors(count: number): string[] {
+  return Array.from({ length: count }, (_, i) => CHART_COLORS[i % CHART_COLORS.length]);
 }
 
+const chartTheme = {
+  gridStroke: 'var(--border)',
+  tickFill: 'var(--muted-foreground)',
+  tooltip: {
+    contentStyle: { backgroundColor: 'var(--card)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', color: 'var(--foreground)' },
+    labelStyle: { color: 'var(--foreground)' },
+  },
+  legend: { wrapperStyle: { color: 'var(--foreground)' } },
+};
+
 export function DashboardPage() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const { theme: _theme } = useTheme();
   const [m, setM] = useState(month);
   const [y, setY] = useState(year);
+  const locale = i18n.language === 'id' ? 'id-ID' : 'en-US';
 
   const { data: monthly, isLoading: monthlyLoading } = useQuery({
     queryKey: ['reports', 'monthly', m, y],
@@ -49,6 +61,10 @@ export function DashboardPage() {
     queryFn: () => reportsApi.trend(m, y),
   });
 
+  const { data: weekly, isLoading: weeklyLoading } = useQuery({
+    queryKey: ['reports', 'weekly', m, y],
+    queryFn: () => reportsApi.weekly(m, y),
+  });
 
   const summary = monthly?.data;
   const trendData = trend?.data ?? [];
@@ -60,7 +76,12 @@ export function DashboardPage() {
     }));
   }, [summary]);
 
-  const pieColors = useMemo(() => getDistinctColors(pieData.length), [pieData.length]);
+  const pieColors = useMemo(() => getChartColors(pieData.length), [pieData.length]);
+
+  const weeklyChartData = useMemo(() => {
+    const weeks = weekly?.data?.weeks ?? [];
+    return weeks.map((w) => ({ ...w, label: t('dashboard.weekLabel', { n: w.week }) }));
+  }, [weekly?.data?.weeks, t]);
 
   const savingsRate = summary?.totalIncome
     ? Math.round((summary.totalSavings / summary.totalIncome) * 10000) / 100
@@ -92,7 +113,7 @@ export function DashboardPage() {
           >
             {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((mo) => (
               <option key={mo} value={mo}>
-                {new Date(2000, mo - 1).toLocaleString('default', { month: 'long' })}
+                {new Date(2000, mo - 1).toLocaleString(i18n.language === 'id' ? 'id' : 'en-US', { month: 'long' })}
               </option>
             ))}
           </select>
@@ -117,7 +138,7 @@ export function DashboardPage() {
           <CardContent className="min-w-0">
             <div className="truncate text-base font-bold sm:text-xl lg:text-2xl">
               {summary?.totalIncome != null
-                ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(summary.totalIncome)
+                ? new Intl.NumberFormat(locale, { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(summary.totalIncome)
                 : '—'}
             </div>
           </CardContent>
@@ -130,7 +151,7 @@ export function DashboardPage() {
           <CardContent className="min-w-0">
             <div className="truncate text-base font-bold text-destructive sm:text-xl lg:text-2xl">
               {summary?.totalExpenses != null
-                ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(summary.totalExpenses)
+                ? new Intl.NumberFormat(locale, { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(summary.totalExpenses)
                 : '—'}
             </div>
           </CardContent>
@@ -142,7 +163,7 @@ export function DashboardPage() {
           <CardContent className="min-w-0">
             <div className="truncate text-base font-bold sm:text-xl lg:text-2xl">
               {summary?.remainingBalance != null
-                ? new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(summary.remainingBalance)
+                ? new Intl.NumberFormat(locale, { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(summary.remainingBalance)
                 : '—'}
             </div>
           </CardContent>
@@ -176,13 +197,17 @@ export function DashboardPage() {
                     outerRadius={100}
                     paddingAngle={2}
                     dataKey="value"
-                    label={({ name, value }) => `${name}: ${value}`}
+                    label={({ name, value }) => `${name}: ${new Intl.NumberFormat(locale, { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(value)}`}
                   >
                     {pieData.map((_, i) => (
                       <Cell key={i} fill={pieColors[i]} />
                     ))}
                   </Pie>
-                  <Tooltip formatter={(v: number) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(v)} />
+                  <Tooltip
+                    contentStyle={chartTheme.tooltip.contentStyle}
+                    labelStyle={chartTheme.tooltip.labelStyle}
+                    formatter={(v: number) => new Intl.NumberFormat(locale, { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(v)}
+                  />
                 </PieChart>
               </ResponsiveContainer>
             ) : (
@@ -202,28 +227,61 @@ export function DashboardPage() {
             ) : trendData.length ? (
               <ResponsiveContainer width="100%" height={280}>
                 <LineChart data={trendData}>
-                  <CartesianGrid strokeDasharray="3 3" className="stroke-muted" />
+                  <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.gridStroke} />
                   <XAxis
                     dataKey="month"
-                    tickFormatter={(mo) => new Date(2000, mo - 1).toLocaleString('default', { month: 'short' })}
+                    tick={{ fill: chartTheme.tickFill }}
+                    tickFormatter={(mo) => new Date(2000, mo - 1).toLocaleString(i18n.language === 'id' ? 'id' : 'en-US', { month: 'short' })}
                   />
-                  <YAxis tickFormatter={(v) => `${v / 1000}k`} />
+                  <YAxis tick={{ fill: chartTheme.tickFill }} tickFormatter={(v) => `${v / 1000}k`} />
                   <Tooltip
-                    formatter={(v: number) => new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(v)}
+                    contentStyle={chartTheme.tooltip.contentStyle}
+                    labelStyle={chartTheme.tooltip.labelStyle}
+                    formatter={(v: number) => new Intl.NumberFormat(locale, { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(v)}
                     labelFormatter={(_: unknown, payload: Array<{ payload?: { month?: number; year?: number } }>) =>
-                    payload?.[0]?.payload && `${payload[0].payload.month}/${payload[0].payload.year}`}
+                      payload?.[0]?.payload ? `${payload[0].payload.month}/${payload[0].payload.year}` : ''}
                   />
-                  <Line type="monotone" dataKey="income" stroke="var(--chart-1)" name="Income" strokeWidth={2} />
-                  <Line type="monotone" dataKey="expenses" stroke="var(--destructive)" name="Expenses" strokeWidth={2} />
-                  <Line type="monotone" dataKey="savings" stroke="var(--chart-2)" name="Savings" strokeWidth={2} />
+                  <Line type="monotone" dataKey="income" stroke="var(--chart-1)" name={t('dashboard.income')} strokeWidth={2} />
+                  <Line type="monotone" dataKey="expenses" stroke="var(--destructive)" name={t('dashboard.expenses')} strokeWidth={2} />
+                  <Line type="monotone" dataKey="savings" stroke="var(--chart-2)" name={t('dashboard.savings')} strokeWidth={2} />
                 </LineChart>
               </ResponsiveContainer>
             ) : (
-              <p className="text-muted-foreground py-12 text-center text-sm">No trend data.</p>
+              <p className="text-muted-foreground py-12 text-center text-sm">{t('dashboard.noTrendData')}</p>
             )}
           </CardContent>
         </Card>
       </div>
+
+      <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
+        <CardHeader>
+          <CardTitle>{t('dashboard.weeklyBreakdown')}</CardTitle>
+          <CardDescription>{t('dashboard.weeklyBreakdownDesc')}</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {weeklyLoading ? (
+            <Skeleton className="h-[280px] w-full" />
+          ) : weeklyChartData.length ? (
+            <ResponsiveContainer width="100%" height={280}>
+              <BarChart data={weeklyChartData} margin={{ top: 8, right: 8, left: 8, bottom: 8 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke={chartTheme.gridStroke} />
+                <XAxis dataKey="label" tick={{ fill: chartTheme.tickFill }} />
+                <YAxis tick={{ fill: chartTheme.tickFill }} tickFormatter={(v) => `${v / 1000}k`} />
+                <Tooltip
+                  contentStyle={chartTheme.tooltip.contentStyle}
+                  labelStyle={chartTheme.tooltip.labelStyle}
+                  formatter={(v: number) => new Intl.NumberFormat(locale, { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(v)}
+                />
+                <Legend {...chartTheme.legend} />
+                <Bar dataKey="expenses" name={t('dashboard.expenses')} fill="var(--destructive)" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="savings" name={t('dashboard.savings')} fill="var(--chart-2)" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <p className="text-muted-foreground py-12 text-center text-sm">{t('dashboard.noWeeklyData')}</p>
+          )}
+        </CardContent>
+      </Card>
 
       <Card className="border-border/50 bg-card/80 backdrop-blur-sm">
         <CardHeader>
@@ -239,7 +297,8 @@ export function DashboardPage() {
 }
 
 function RecentTransactions({ month, year }: { month: number; year: number }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const locale = i18n.language === 'id' ? 'id-ID' : 'en-US';
   const { data: res, isLoading } = useQuery({
     queryKey: ['transactions-list', month, year],
     queryFn: () => transactionsApi.list({ month, year, limit: 10 }),
@@ -265,7 +324,7 @@ function RecentTransactions({ month, year }: { month: number; year: number }) {
             </div>
             <span className={item.type === 'expense' ? 'text-destructive' : 'text-green-600 dark:text-green-400'}>
               {item.type === 'expense' ? '-' : '+'}
-              {new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(item.amount)}
+              {new Intl.NumberFormat(locale, { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(item.amount)}
             </span>
           </div>
         ))}

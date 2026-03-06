@@ -129,6 +129,8 @@ export const reportsApi = {
     api.get<{ success: true; data: HealthScoreResult }>(`/reports/health-score?month=${month}&year=${year}`),
   trend: (month: number, year: number) =>
     api.get<{ success: true; data: TrendPoint[] }>(`/reports/trend?month=${month}&year=${year}`),
+  weekly: (month: number, year: number) =>
+    api.get<{ success: true; data: WeeklyBreakdownResult }>(`/reports/weekly?month=${month}&year=${year}`),
   allocation: {
     get: () => api.get<{ success: true; data: { fixed: number; variable: number; saving: number; emergency: number } }>('/reports/allocation'),
     update: (body: { fixedPercent?: number; variablePercent?: number; savingPercent?: number; emergencyPercent?: number }) =>
@@ -158,4 +160,9 @@ export interface TrendPoint {
   income: number;
   expenses: number;
   savings: number;
+}
+
+export interface WeeklyBreakdownResult {
+  totalMonthlyIncome: number;
+  weeks: Array<{ week: number; label: string; expenses: number; savings: number }>;
 }

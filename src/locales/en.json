@@ -58,7 +58,15 @@
     "recentTransactions": "Recent transactions",
     "transactions": "transactions",
     "latestActivity": "Latest activity",
-    "noTransactionsThisMonth": "No transactions this month."
+    "noTransactionsThisMonth": "No transactions this month.",
+    "weeklyBreakdown": "Income & Expenses by Week",
+    "weeklyBreakdownDesc": "Weekly breakdown for this month",
+    "noWeeklyData": "No weekly data.",
+    "noTrendData": "No trend data.",
+    "income": "Income",
+    "expenses": "Expenses",
+    "savings": "Savings",
+    "weekLabel": "Week {{n}}"
   },
   "transactions": {
     "addTransaction": "Add transaction",

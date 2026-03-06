@@ -58,7 +58,15 @@
     "recentTransactions": "Transaksi terbaru",
     "transactions": "transaksi",
     "latestActivity": "Aktivitas terbaru",
-    "noTransactionsThisMonth": "Tidak ada transaksi bulan ini."
+    "noTransactionsThisMonth": "Tidak ada transaksi bulan ini.",
+    "weeklyBreakdown": "Pemasukan & Pengeluaran per Minggu",
+    "weeklyBreakdownDesc": "Rincian per minggu dalam bulan ini",
+    "noWeeklyData": "Tidak ada data mingguan.",
+    "noTrendData": "Tidak ada data tren.",
+    "income": "Pemasukan",
+    "expenses": "Pengeluaran",
+    "savings": "Tabungan",
+    "weekLabel": "Minggu {{n}}"
   },
   "transactions": {
     "addTransaction": "Tambah transaksi",
