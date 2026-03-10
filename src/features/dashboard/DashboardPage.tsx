@@ -27,19 +27,39 @@ const now = new Date();
 const month = now.getMonth() + 1;
 const year = now.getFullYear();
 
-const CHART_COLORS = ['var(--chart-1)', 'var(--chart-2)', 'var(--chart-3)', 'var(--chart-4)', 'var(--chart-5)'];
+/** 12 warna berbeda untuk pie chart agar tidak ada yang sama/serupa */
+const PIE_CHART_COLORS = [
+  'var(--chart-1)',
+  'var(--chart-2)',
+  'var(--chart-3)',
+  'var(--chart-4)',
+  'var(--chart-5)',
+  'var(--chart-6)',
+  'var(--chart-7)',
+  'var(--chart-8)',
+  'var(--chart-9)',
+  'var(--chart-10)',
+  'var(--chart-11)',
+  'var(--chart-12)',
+];
 
-/** Theme-aware colors for pie (cycles chart-1..5). */
+/** Theme-aware colors untuk pie; tiap kategori dapat warna unik hingga 12 kategori. */
 function getChartColors(count: number): string[] {
-  return Array.from({ length: count }, (_, i) => CHART_COLORS[i % CHART_COLORS.length]);
+  return Array.from({ length: count }, (_, i) => PIE_CHART_COLORS[i % PIE_CHART_COLORS.length]);
 }
 
 const chartTheme = {
   gridStroke: 'var(--border)',
   tickFill: 'var(--muted-foreground)',
   tooltip: {
-    contentStyle: { backgroundColor: 'var(--card)', border: '1px solid var(--border)', borderRadius: 'var(--radius)', color: 'var(--foreground)' },
+    contentStyle: {
+      backgroundColor: 'var(--card)',
+      border: '1px solid var(--border)',
+      borderRadius: 'var(--radius)',
+      color: 'var(--foreground)',
+    },
     labelStyle: { color: 'var(--foreground)' },
+    itemStyle: { color: 'var(--foreground)' },
   },
   legend: { wrapperStyle: { color: 'var(--foreground)' } },
 };
@@ -206,6 +226,7 @@ export function DashboardPage() {
                   <Tooltip
                     contentStyle={chartTheme.tooltip.contentStyle}
                     labelStyle={chartTheme.tooltip.labelStyle}
+                    itemStyle={chartTheme.tooltip.itemStyle}
                     formatter={(v: number) => new Intl.NumberFormat(locale, { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(v)}
                   />
                 </PieChart>
@@ -237,6 +258,7 @@ export function DashboardPage() {
                   <Tooltip
                     contentStyle={chartTheme.tooltip.contentStyle}
                     labelStyle={chartTheme.tooltip.labelStyle}
+                    itemStyle={chartTheme.tooltip.itemStyle}
                     formatter={(v: number) => new Intl.NumberFormat(locale, { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(v)}
                     labelFormatter={(_: unknown, payload: Array<{ payload?: { month?: number; year?: number } }>) =>
                       payload?.[0]?.payload ? `${payload[0].payload.month}/${payload[0].payload.year}` : ''}
@@ -270,6 +292,7 @@ export function DashboardPage() {
                 <Tooltip
                   contentStyle={chartTheme.tooltip.contentStyle}
                   labelStyle={chartTheme.tooltip.labelStyle}
+                  itemStyle={chartTheme.tooltip.itemStyle}
                   formatter={(v: number) => new Intl.NumberFormat(locale, { style: 'currency', currency: 'IDR', maximumFractionDigits: 0 }).format(v)}
                 />
                 <Legend {...chartTheme.legend} />
